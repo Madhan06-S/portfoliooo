@@ -4,8 +4,8 @@ import bpy, math, os, shutil
 from mathutils import Vector
 
 # ============================================================
-# PORTFOLIO ENTRANCE — FINAL ART-DIRECTION 3D BUILD (V3)
-# Stylized hand-drawn diorama entrance with full visual depth.
+# PORTFOLIO ENTRANCE — V4 FINAL POLISH PASS
+# Premium stylized 3D diorama entrance.
 # Compatible with Blender 5.2.1 / EEVEE & React Three Fiber export.
 # ============================================================
 
@@ -149,6 +149,7 @@ METAL = make_mat("Dark_Metal", (0.045, 0.05, 0.055), 0.32, 0.45)
 LEAF = make_mat("Leaf_Dark", (0.055, 0.19, 0.065), 0.92)
 LEAF2 = make_mat("Leaf_Light", (0.14, 0.32, 0.08), 0.92)
 LEAF3 = make_mat("Leaf_Warm", (0.22, 0.38, 0.10), 0.90)
+LEAF4 = make_mat("Leaf_Accent", (0.28, 0.42, 0.12), 0.88)
 POT = make_mat("Terracotta", (0.47, 0.17, 0.055), 0.82)
 SOIL = make_mat("Dark_Soil", (0.08, 0.05, 0.03), 0.98)
 YELLOW = make_mat("Duck_Yellow", (0.92, 0.56, 0.035), 0.65)
@@ -173,7 +174,7 @@ world.use_nodes = True
 world.node_tree.nodes["Background"].inputs["Color"].default_value = (
     0.055, 0.043, 0.032, 1
 )
-world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.35
+world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.38
 
 # Courtyard ground
 cube("Entrance_Ground", (0, 1.0, -0.14), (18, 15, 0.28), COURTYARD, 0.06)
@@ -193,7 +194,7 @@ cube("Wall_Left", (-(opening / 2 + side / 2), 0, H / 2), (side, T, H), BRICK, 0.
 cube("Wall_Right", ((opening / 2 + side / 2), 0, H / 2), (side, T, H), BRICK, 0.045, parent=wall_root)
 cube("Wall_Top", (0, 0, door_h + (H - door_h) / 2), (opening, T, H - door_h), BRICK, 0.045, parent=wall_root)
 
-# Multi-layered raised brick details for realistic texture & shadow
+# Multi-layered raised brick details
 for row, z in enumerate([0.38, 0.92, 1.46, 2.00, 2.54, 3.08, 3.62, 4.16, 4.70, 5.24, 5.78, 6.32]):
     offset = 0.58 if row % 2 else 0.0
     x = -W / 2 + 0.45 + offset
@@ -217,17 +218,17 @@ cube("Interior_Dark", (0, 0.20, door_h / 2), (opening - 0.05, 0.10, door_h - 0.0
 left_hinge = empty("Left_Door_Hinge", (-opening / 2, -0.46, 0), parent=wall_root)
 right_hinge = empty("Right_Door_Hinge", (opening / 2, -0.46, 0), parent=wall_root)
 
-left_door = cube("Left_Door", (door_w / 2, 0, door_h / 2), (door_w, 0.20, door_h), WOOD, 0.045, parent=left_hinge)
-right_door = cube("Right_Door", (-door_w / 2, 0, door_h / 2), (door_w, 0.20, door_h), WOOD, 0.045, parent=right_hinge)
+left_door = cube("Left_Door", (door_w / 2, 0, door_h / 2), (door_w, 0.22, door_h), WOOD, 0.045, parent=left_hinge)
+right_door = cube("Right_Door", (-door_w / 2, 0, door_h / 2), (door_w, 0.22, door_h), WOOD, 0.045, parent=right_hinge)
 
 # Door inset panels
 for parent, sign in [(left_hinge, 1), (right_hinge, -1)]:
     for z in (0.72, 1.62, 2.52):
-        cube("Door_Inset", (sign * 0.95, -0.115, z), (1.46, 0.035, 0.55), WOOD2, 0.025, parent=parent)
+        cube("Door_Inset", (sign * 0.95, -0.125, z), (1.46, 0.035, 0.55), WOOD2, 0.025, parent=parent)
 
 # Handles & Hinges
-cyl("Door_Handle_Left", (0.18, -0.20, 1.60), 0.055, 0.45, METAL, 16, rot=(math.pi / 2, 0, 0), parent=left_hinge)
-cyl("Door_Handle_Right", (-0.18, -0.20, 1.60), 0.055, 0.45, METAL, 16, rot=(math.pi / 2, 0, 0), parent=right_hinge)
+cyl("Door_Handle_Left", (0.18, -0.22, 1.60), 0.055, 0.45, METAL, 16, rot=(math.pi / 2, 0, 0), parent=left_hinge)
+cyl("Door_Handle_Right", (-0.18, -0.22, 1.60), 0.055, 0.45, METAL, 16, rot=(math.pi / 2, 0, 0), parent=right_hinge)
 
 for parent, sign in [(left_hinge, 1), (right_hinge, -1)]:
     for z in (0.55, 2.65):
@@ -262,34 +263,33 @@ for x, z, label in [
 
 # -------------------- PORTFOLIO hanging sign --------------------
 
-sign_root = empty("Portfolio_Sign_Root", (0, -0.96, 4.72))
-cube("Sign_Beam", (0, -0.86, 5.72), (4.35, 0.30, 0.25), WOOD2, 0.05)
+sign_root = empty("Portfolio_Sign_Root", (0, -0.96, 4.70))
+cube("Sign_Beam", (0, -0.86, 5.68), (4.10, 0.28, 0.24), WOOD2, 0.05)
 
-# Hanging chains
-chain_l = empty("Portfolio_Sign_Chain_Left", (-1.82, -0.88, 5.10))
-chain_r = empty("Portfolio_Sign_Chain_Right", (1.82, -0.88, 5.10))
+chain_l = empty("Portfolio_Sign_Chain_Left", (-1.65, -0.88, 5.08))
+chain_r = empty("Portfolio_Sign_Chain_Right", (1.65, -0.88, 5.08))
 
-for x, parent_c in [(-1.82, chain_l), (1.82, chain_r)]:
-    cyl("Sign_Rope", (x, -0.86, 5.10), 0.025, 1.10, METAL, 10)
-    for z in (4.70, 4.90, 5.10):
+for x, parent_c in [(-1.65, chain_l), (1.65, chain_r)]:
+    cyl("Sign_Rope", (x, -0.86, 5.08), 0.024, 1.05, METAL, 10)
+    for z in (4.68, 4.88, 5.08):
         torus = bpy.ops.mesh.primitive_torus_add(
-            major_radius=0.055, minor_radius=0.012, major_segments=12, minor_segments=6,
+            major_radius=0.052, minor_radius=0.012, major_segments=12, minor_segments=6,
             location=(x, -0.88, z), rotation=(0, math.pi / 2, 0),
         )
         o = bpy.context.object
         o.data.materials.append(METAL)
         o.parent = parent_c
 
-sign_board = cube("Portfolio_Sign", (0, 0, 0), (3.65, 0.25, 0.82), WOOD2, 0.07, parent=sign_root)
-text_obj("Portfolio_Sign_Text", "PORTFOLIO", (0, -0.15, -0.02), 0.40, WHITE, 0.018, parent=sign_root)
+sign_board = cube("Portfolio_Sign", (0, 0, 0), (3.30, 0.22, 0.74), WOOD2, 0.06, parent=sign_root)
+text_obj("Portfolio_Sign_Text", "PORTFOLIO", (0, -0.14, -0.015), 0.36, WHITE, 0.018, parent=sign_root)
 
 # Sway animation
 sign_root.rotation_mode = "XYZ"
-sign_root.rotation_euler.y = math.radians(-2.5)
+sign_root.rotation_euler.y = math.radians(-2.2)
 sign_root.keyframe_insert("rotation_euler", frame=1, index=1)
-sign_root.rotation_euler.y = math.radians(2.5)
+sign_root.rotation_euler.y = math.radians(2.2)
 sign_root.keyframe_insert("rotation_euler", frame=40, index=1)
-sign_root.rotation_euler.y = math.radians(-2.5)
+sign_root.rotation_euler.y = math.radians(-2.2)
 sign_root.keyframe_insert("rotation_euler", frame=80, index=1)
 sign_root.rotation_euler.y = 0
 sign_root.keyframe_insert("rotation_euler", frame=120, index=1)
@@ -297,32 +297,36 @@ sign_root.keyframe_insert("rotation_euler", frame=120, index=1)
 
 # -------------------- organic 3D tree (Entrance_Tree) --------------------
 
-tree_root = empty("Entrance_Tree", (-5.05, -0.72, 0))
+tree_root = empty("Entrance_Tree", (-4.95, -0.72, 0))
 
-# Organic trunk with tapered base
-cyl("Tree_Trunk", (0, 0, 2.10), 0.52, 4.20, WOOD2, 16, parent=tree_root)
+cyl("Tree_Trunk", (0, 0, 2.10), 0.54, 4.20, WOOD2, 18, parent=tree_root)
 
-# Tree branches
 branches_data = [
-    (( -0.25, 0.0, 3.35), (0, 0.25, -0.35), 0.24, 2.10),
-    (( 0.40, 0.0, 3.70), (0, -0.30, 0.30), 0.20, 1.70),
-    (( -0.45, 0.0, 4.20), (0, 0.45, -0.25), 0.17, 1.50),
-    (( 0.15, 0.0, 4.60), (0.2, 0.1, 0.1), 0.14, 1.20),
+    (( -0.30, 0.0, 3.30), (0, 0.25, -0.35), 0.25, 2.20),
+    (( 0.45, 0.0, 3.65), (0, -0.30, 0.30), 0.21, 1.80),
+    (( -0.50, 0.0, 4.20), (0, 0.45, -0.25), 0.18, 1.60),
+    (( 0.20, 0.0, 4.65), (0.2, 0.1, 0.1), 0.14, 1.30),
 ]
 
 for i, (loc, rot, radius, length) in enumerate(branches_data):
     cyl("Tree_Branch_%d" % i, loc, radius, length, WOOD2, 14, rot=rot, parent=tree_root)
 
-# Multi-layered organic canopy (varied foliage masses & colors)
+# Multi-layered organic canopy (14 varied foliage masses & colors)
 leaf_masses = [
-    ((-0.85, 0.0, 5.00), (1.15, 0.55, 0.95), LEAF),
+    ((-0.90, 0.0, 5.00), (1.15, 0.55, 0.95), LEAF),
     ((0.15, 0.0, 5.40), (1.35, 0.60, 1.10), LEAF2),
     ((0.95, 0.0, 4.90), (1.10, 0.50, 0.90), LEAF3),
-    ((-1.00, 0.0, 4.35), (0.95, 0.48, 0.85), LEAF2),
+    ((-1.05, 0.0, 4.35), (0.95, 0.48, 0.85), LEAF2),
     ((0.60, 0.0, 4.25), (1.05, 0.52, 0.90), LEAF),
-    ((1.20, 0.0, 5.55), (0.85, 0.45, 0.75), LEAF3),
-    ((-0.30, 0.0, 5.95), (0.95, 0.48, 0.85), LEAF),
-    ((-1.40, 0.0, 5.45), (0.75, 0.40, 0.70), LEAF2),
+    ((1.25, 0.0, 5.55), (0.85, 0.45, 0.75), LEAF3),
+    ((-0.35, 0.0, 5.95), (0.95, 0.48, 0.85), LEAF4),
+    ((-1.45, 0.0, 5.45), (0.75, 0.40, 0.70), LEAF2),
+    ((0.00, 0.0, 4.70), (0.90, 0.45, 0.80), LEAF4),
+    ((-0.60, 0.0, 5.50), (1.05, 0.50, 0.90), LEAF3),
+    ((0.75, 0.0, 4.75), (0.85, 0.42, 0.75), LEAF),
+    ((-1.20, 0.0, 4.85), (0.80, 0.40, 0.70), LEAF4),
+    ((0.40, 0.0, 5.80), (0.80, 0.40, 0.70), LEAF2),
+    ((-0.75, 0.0, 6.25), (0.70, 0.38, 0.65), LEAF),
 ]
 
 for i, (loc, scale, mat) in enumerate(leaf_masses):
@@ -346,11 +350,12 @@ sphere("Mouse_Nose", (0, -0.28, -2.36), (0.04, 0.04, 0.04), BLACK, parent=mouse_
 for sx in (-0.11, 0.11):
     sphere("Mouse_Eye", (sx, -0.22, -2.32), (0.025, 0.018, 0.025), BLACK, parent=mouse_root)
 
-# Mouse paws/feet
+# Mouse paws & feet
 for sx in (-0.12, 0.12):
-    sphere("Mouse_Paw", (sx, -0.05, -2.48), (0.06, 0.06, 0.05), PAPER, parent=mouse_root)
+    sphere("Mouse_Paw", (sx, -0.16, -2.10), (0.05, 0.05, 0.05), PAPER, parent=mouse_root)
+    sphere("Mouse_Foot", (sx, -0.05, -2.48), (0.06, 0.06, 0.05), PAPER, parent=mouse_root)
 
-# Mouse tail (Bezier curve)
+# Mouse tail
 mouse_curve = bpy.data.curves.new("Mouse_Tail_Curve", "CURVE")
 mouse_curve.dimensions = "3D"
 mouse_curve.bevel_depth = 0.028
@@ -380,12 +385,12 @@ for frame, angle in [(1, -4), (35, 4), (70, -3), (105, 0), (120, 0)]:
 
 cat_root = empty("Cat", (-2.45, -0.88, 0.78))
 
-sphere("Cat_Body", (0, 0, 0), (0.58, 0.32, 0.52), PAPER, parent=cat_root)
-sphere("Cat_Head", (0, -0.04, 0.52), (0.44, 0.28, 0.38), PAPER, parent=cat_root)
+sphere("Cat_Body", (0, 0, 0), (0.56, 0.32, 0.50), PAPER, parent=cat_root)
+sphere("Cat_Head", (0, -0.04, 0.52), (0.42, 0.28, 0.36), PAPER, parent=cat_root)
 
 # Pointed ears
-for sx in (-0.28, 0.28):
-    cone("Cat_Ear", (sx, -0.03, 0.86), 0.16, 0.0, 0.32, PAPER, 3, rot=(0, 0, math.radians(90 if sx > 0 else -90)), parent=cat_root)
+for sx in (-0.26, 0.26):
+    cone("Cat_Ear", (sx, -0.03, 0.84), 0.16, 0.0, 0.32, PAPER, 3, rot=(0, 0, math.radians(90 if sx > 0 else -90)), parent=cat_root)
 
 # Eyes & Muzzle
 for sx in (-0.14, 0.14):
@@ -394,11 +399,11 @@ for sx in (-0.14, 0.14):
 sphere("Cat_Muzzle", (0, -0.28, 0.48), (0.08, 0.05, 0.06), PAPER, parent=cat_root)
 
 # 4 Paws
-for sx in (-0.22, 0.22):
-    sphere("Cat_Paw_Front", (sx, -0.22, -0.22), (0.10, 0.12, 0.08), PAPER, parent=cat_root)
-    sphere("Cat_Paw_Back", (sx, 0.18, -0.22), (0.12, 0.12, 0.09), PAPER, parent=cat_root)
+for sx in (-0.20, 0.20):
+    sphere("Cat_Paw_FL", (sx, -0.22, -0.22), (0.10, 0.12, 0.08), PAPER, parent=cat_root)
+    sphere("Cat_Paw_BL", (sx, 0.18, -0.22), (0.12, 0.12, 0.09), PAPER, parent=cat_root)
 
-# Cat Tail (Bezier curve)
+# Cat Tail
 cat_curve = bpy.data.curves.new("Cat_Tail_Curve", "CURVE")
 cat_curve.dimensions = "3D"
 cat_curve.bevel_depth = 0.055
@@ -449,9 +454,9 @@ cyl("Planter", (0, 0, 0), 0.48, 0.70, POT, 24, parent=planter_root)
 cyl("Planter_Rim", (0, 0, 0.33), 0.52, 0.12, POT, 24, parent=planter_root)
 cyl("Planter_Soil", (0, 0, 0.32), 0.46, 0.05, SOIL, 20, parent=planter_root)
 
-# 10 angled green leaves
-for i in range(10):
-    a = i * math.tau / 10
+# 12 angled green leaves
+for i in range(12):
+    a = i * math.tau / 12
     sphere(
         "Plant_Leaf_%d" % i,
         (
@@ -479,19 +484,20 @@ for sx in (-0.07, 0.07):
 
 path_root = empty("Stone_Path", (0, 0, 0))
 
-# 11 stones guiding from foreground (y=-4.6) to doorway (y=-1.2)
+# 12 stones guiding from foreground (y=-4.2) to doorway (y=-0.85)
 stones_data = [
-    ( 0.00, -4.60, 0.85, 0.70, 4),
-    (-0.65, -4.10, 0.75, 0.65, -6),
-    ( 0.75, -3.75, 0.78, 0.65, 8),
-    (-0.35, -3.35, 0.80, 0.65, -4),
-    ( 0.45, -2.95, 0.72, 0.62, 5),
-    (-0.55, -2.55, 0.76, 0.64, -7),
-    ( 0.30, -2.15, 0.74, 0.62, 6),
-    (-0.40, -1.75, 0.78, 0.65, -5),
-    ( 0.25, -1.40, 0.72, 0.60, 4),
-    (-0.20, -1.10, 0.70, 0.58, -3),
-    ( 0.10, -0.85, 0.68, 0.55, 2),
+    ( 0.00, -4.20, 0.86, 0.68, 4),
+    (-0.60, -3.85, 0.76, 0.64, -6),
+    ( 0.70, -3.50, 0.78, 0.65, 7),
+    (-0.35, -3.15, 0.80, 0.64, -5),
+    ( 0.45, -2.80, 0.74, 0.62, 6),
+    (-0.50, -2.45, 0.76, 0.64, -7),
+    ( 0.35, -2.10, 0.74, 0.62, 5),
+    (-0.38, -1.75, 0.78, 0.65, -4),
+    ( 0.28, -1.45, 0.72, 0.60, 4),
+    (-0.22, -1.20, 0.70, 0.58, -3),
+    ( 0.12, -0.98, 0.68, 0.56, 3),
+    (-0.05, -0.80, 0.65, 0.52, -2),
 ]
 
 for i, (x, y, w, d, rot) in enumerate(stones_data):
@@ -526,7 +532,7 @@ for x, z, r in [
 bpy.ops.object.light_add(type="AREA", location=(0, -6.5, 7.0))
 key = bpy.context.object
 key.name = "Soft_Key"
-key.data.energy = 1100
+key.data.energy = 1200
 key.data.shape = "RECTANGLE"
 key.data.size = 8.0
 look_at(key, (0, 0, 2.5))
@@ -548,19 +554,19 @@ look_at(fill_win, (3.5, 0, 2.5))
 bpy.ops.object.light_add(type="AREA", location=(0, 2.0, 3.5))
 rim = bpy.context.object
 rim.name = "Interior_Glow"
-rim.data.energy = 750
+rim.data.energy = 800
 rim.data.size = 4.0
 look_at(rim, (0, 0, 2.0))
 
 
-# -------------------- camera --------------------
+# -------------------- camera (V4 Composition: 10-15% Closer) --------------------
 
-bpy.ops.object.camera_add(location=(0, -17.5, 3.45))
+bpy.ops.object.camera_add(location=(0, -15.2, 3.15))
 cam = bpy.context.object
 cam.name = "Entrance_Camera"
 cam.data.lens = 48
 cam.data.sensor_width = 36
-look_at(cam, (0, -0.20, 2.50))
+look_at(cam, (0, -0.20, 2.45))
 bpy.context.scene.camera = cam
 
 
@@ -597,7 +603,7 @@ bpy.ops.export_scene.gltf(
 scene.render.filepath = PREVIEW_PATH
 bpy.ops.render.render(write_still=True)
 
-# Also copy build files to Desktop fallback folder for backup
+# Backup build files to Desktop fallback folder
 desktop_dir = os.path.expanduser("~/Desktop/portfolio-entrance-build/public/models")
 if OUT_DIR != desktop_dir:
     os.makedirs(desktop_dir, exist_ok=True)
@@ -607,7 +613,7 @@ if OUT_DIR != desktop_dir:
 
 print("")
 print("======================================================")
-print("PORTFOLIO ENTRANCE 3D BUILD V3 FINAL ART PASS SUCCESS")
+print("PORTFOLIO ENTRANCE 3D BUILD V4 FINAL POLISH SUCCESS")
 print("======================================================")
 print("BLEND :", BLEND_PATH)
 print("GLB   :", GLB_PATH)
@@ -615,7 +621,7 @@ print("IMAGE :", PREVIEW_PATH)
 print("======================================================")
 
 result = {
-    "status": "PORTFOLIO ENTRANCE 3D BUILD V3 FINAL ART PASS SUCCESS",
+    "status": "PORTFOLIO ENTRANCE 3D BUILD V4 FINAL POLISH SUCCESS",
     "blend_path": BLEND_PATH,
     "glb_path": GLB_PATH,
     "preview_path": PREVIEW_PATH,
