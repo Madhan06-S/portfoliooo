@@ -8,7 +8,7 @@ import { useAchievements } from '../../../context/AchievementsContext';
 
 const MODEL_PATH = '/models/portfolio-entrance.glb';
 
-// Preload GLB asset
+// Preload GLB model asset
 useGLTF.preload(MODEL_PATH);
 
 const BlenderEntranceContent = ({ position = [0, 0, 22], onComplete }) => {
@@ -50,18 +50,31 @@ const BlenderEntranceContent = ({ position = [0, 0, 22], onComplete }) => {
   const { scene, nodes, animations } = useGLTF(MODEL_PATH);
   const { actions } = useAnimations(animations, groupRef);
 
-  // Play embedded GLB keyframe animations (sign sway, mouse swing, cat idle)
+  // CRITICAL FIX: Play ONLY ambient animations (sign sway, mouse swing, cat idle)
+  // Explicitly STOP and RESET door actions so doors remain CLOSED on mount
   useEffect(() => {
-    if (actions && Object.keys(actions).length > 0) {
-      Object.values(actions).forEach((action) => {
-        try {
-          action.play();
-        } catch (e) {}
+    if (actions) {
+      Object.entries(actions).forEach(([name, action]) => {
+        if (
+          name.toLowerCase().includes('door') ||
+          name.toLowerCase().includes('hinge') ||
+          name.toLowerCase().includes('left_door') ||
+          name.toLowerCase().includes('right_door')
+        ) {
+          try {
+            action.stop();
+            action.reset();
+          } catch (e) {}
+        } else {
+          try {
+            action.play();
+          } catch (e) {}
+        }
       });
     }
   }, [actions]);
 
-  // Traverse scene to set up shadows, material updates, and locate door hinge nodes
+  // Traverse scene to setup shadows, material roughness, and locate door hinge nodes
   useEffect(() => {
     if (scene) {
       scene.traverse((child) => {
@@ -71,15 +84,17 @@ const BlenderEntranceContent = ({ position = [0, 0, 22], onComplete }) => {
           if (child.material) {
             child.material.needsUpdate = true;
             if (child.material.roughness !== undefined) {
-              child.material.roughness = Math.max(child.material.roughness, 0.4);
+              child.material.roughness = Math.max(child.material.roughness, 0.35);
             }
           }
         }
         if (child.name === 'Left_Door_Hinge' || child.name.includes('Left_Door_Hinge')) {
           leftHingeRef.current = child;
+          child.rotation.y = 0;
         }
         if (child.name === 'Right_Door_Hinge' || child.name.includes('Right_Door_Hinge')) {
           rightHingeRef.current = child;
+          child.rotation.y = 0;
         }
       });
 
@@ -89,20 +104,24 @@ const BlenderEntranceContent = ({ position = [0, 0, 22], onComplete }) => {
       if (!rightHingeRef.current && nodes.Right_Door) {
         rightHingeRef.current = nodes.Right_Door.parent || nodes.Right_Door;
       }
+
+      // Guarantee initial door state is 100% CLOSED
+      if (leftHingeRef.current) leftHingeRef.current.rotation.y = 0;
+      if (rightHingeRef.current) rightHingeRef.current.rotation.y = 0;
     }
   }, [scene, nodes]);
 
-  // Adjust starting camera framing to match Blender wide cinematic view
+  // CRITICAL FIX: Position camera to match Blender preview framing (wide diorama composition)
   useEffect(() => {
     if (camera) {
-      gsap.to(camera.position, {
-        x: position[0],
-        y: position[1] + 1.8,
-        z: position[2] + 6.2,
-        duration: 1.5,
-        ease: 'power2.out',
-      });
-      camera.lookAt(position[0], position[1] + 1.2, position[2]);
+      // Wall is at position [0, 0, 22]
+      // In Blender, camera was at Y=-15.2 (Z=+15.2 in Three.js), Z=3.15 (Y=3.15 in Three.js)
+      const targetX = position[0];
+      const targetY = position[1] + 3.15;
+      const targetZ = position[2] + 15.2;
+
+      camera.position.set(targetX, targetY, targetZ);
+      camera.lookAt(position[0], position[1] + 2.3, position[2]);
     }
   }, [camera, position]);
 
@@ -118,6 +137,26 @@ const BlenderEntranceContent = ({ position = [0, 0, 22], onComplete }) => {
     };
   }, [isHovered, isOpen, isAnimating]);
 
+  // Helper to check if an object is part of the interactive door area
+  const isDoorObject = (obj) => {
+    let curr = obj;
+    while (curr) {
+      if (
+        curr.name &&
+        (curr.name.includes('Door') ||
+          curr.name.includes('Frame') ||
+          curr.name.includes('Handle') ||
+          curr.name.includes('Hinge') ||
+          curr.name.includes('Plaque') ||
+          curr.name.includes('Tech'))
+      ) {
+        return true;
+      }
+      curr = curr.parent;
+    }
+    return false;
+  };
+
   // Door click / touch tap handler
   const handleDoorClick = (e) => {
     if (e && e.stopPropagation) e.stopPropagation();
@@ -127,7 +166,7 @@ const BlenderEntranceContent = ({ position = [0, 0, 22], onComplete }) => {
     setIsOpen(true);
     setIsAnimating(true);
 
-    // Trigger UI overlay fade-out
+    // Trigger UI overlay exit transition
     window.dispatchEvent(new CustomEvent('entranceTransitionStart'));
 
     // Fade ambient audio
@@ -138,7 +177,7 @@ const BlenderEntranceContent = ({ position = [0, 0, 22], onComplete }) => {
       } catch (err) {}
     }
 
-    // Play door opening audio
+    // Play door unlocking sound
     try {
       play('uchyleniedrzwi', { volume: 0.8 });
     } catch (e) {}
@@ -155,7 +194,7 @@ const BlenderEntranceContent = ({ position = [0, 0, 22], onComplete }) => {
       } catch (e) {}
     }, 0.3);
 
-    // Animate Left and Right doors opening
+    // Animate Left and Right doors opening smoothly
     if (leftHingeRef.current) {
       tl.to(
         leftHingeRef.current.rotation,
@@ -180,7 +219,7 @@ const BlenderEntranceContent = ({ position = [0, 0, 22], onComplete }) => {
       );
     }
 
-    // Move camera smoothly forward into corridor
+    // Move camera smoothly forward into corridor through open doorway
     tl.to(
       camera.position,
       {
@@ -202,7 +241,7 @@ const BlenderEntranceContent = ({ position = [0, 0, 22], onComplete }) => {
 
   return (
     <group ref={groupRef} position={position}>
-      {/* Essential lighting for GLB materials in Three.js scene */}
+      {/* Essential lighting for GLB materials in R3F scene */}
       <ambientLight intensity={2.2} />
       <directionalLight position={[5, 10, 10]} intensity={1.5} color="#fff6e8" castShadow />
       <directionalLight position={[-5, 8, 5]} intensity={0.8} color="#e0f0ff" />
@@ -212,13 +251,18 @@ const BlenderEntranceContent = ({ position = [0, 0, 22], onComplete }) => {
         object={scene}
         onPointerOver={(e) => {
           e.stopPropagation();
-          setIsHovered(true);
+          if (isDoorObject(e.object)) {
+            setIsHovered(true);
+          }
         }}
         onPointerOut={(e) => {
           e.stopPropagation();
           setIsHovered(false);
         }}
-        onClick={handleDoorClick}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleDoorClick(e);
+        }}
       />
     </group>
   );
