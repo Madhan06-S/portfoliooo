@@ -1,0 +1,273 @@
+.entrance-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+  padding: 2.5rem;
+  pointer-events: none; // Allows clicks to pass through to the 3D Canvas
+  user-select: none;
+  opacity: 1;
+  transition: opacity 1.5s ease-out;
+
+  // Exit animation class
+  &--exit {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  // Clean Fullscreen 2D CIT Entrance Landing Background (No borders, no tilt, straight front-facing)
+  &__bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    object-position: center 45%;
+    z-index: -2;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  // Interactive Closed Gate Click Hotspot in the center
+  &__gate-hotspot {
+    position: absolute;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -40%);
+    width: 360px;
+    height: 420px;
+    cursor: pointer;
+    z-index: 10;
+    pointer-events: auto;
+    border-radius: 16px;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+
+  // 2D Flying Birds Micro-animations
+  .entrance-birds {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 45%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: -1; // Render behind UI panels
+  }
+
+  .entrance-bird {
+    position: absolute;
+    opacity: 0.65;
+    
+    &--1 {
+      top: 12%;
+      animation: flyAcross 20s linear infinite;
+      animation-delay: 1s;
+    }
+    
+    &--2 {
+      top: 22%;
+      animation: flyAcross 26s linear infinite;
+      animation-delay: 6s;
+    }
+    
+    &--3 {
+      top: 8%;
+      animation: flyAcross 32s linear infinite;
+      animation-delay: 12s;
+    }
+    
+    svg {
+      animation: flapWings 0.65s ease-in-out infinite alternate;
+    }
+  }
+
+  // Header styles (Top-Left Glassmorphic panel)
+  &__header {
+    align-self: flex-start;
+    display: flex;
+    flex-direction: column;
+    pointer-events: auto; // Enables hover/selection if needed
+    text-align: left;
+    max-width: 440px;
+    
+    // Glassmorphism styling
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 10px 32px 0 rgba(0, 0, 0, 0.08);
+    border-radius: 14px;
+    padding: 1.8rem 2.2rem;
+    
+    border-top: 1.5px solid rgba(255, 255, 255, 0.6);
+    border-left: 1.5px solid rgba(255, 255, 255, 0.6);
+    animation: headerSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  &__name {
+    font-family: 'Inter', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin: 0 0 0.8rem 0;
+    color: #1a1a1a;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+  }
+
+  &__roles {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  &__role {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #4a4a4a;
+    margin: 0;
+    letter-spacing: 0.2px;
+  }
+
+  &__divider {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin: 1rem 0;
+    width: 90%;
+
+    &-line {
+      flex: 1;
+      height: 1px;
+      background-color: rgba(26, 26, 26, 0.25);
+    }
+
+    &-diamond {
+      font-size: 0.75rem;
+      color: rgba(26, 26, 26, 0.5);
+    }
+  }
+
+  &__welcome {
+    font-family: 'Caveat', cursive;
+    font-size: 1.55rem;
+    font-weight: 500;
+    margin: 0;
+    color: #2b2b2b;
+  }
+
+  // Avatar HTML tooltip styled for premium glassmorphism/sketch look
+  .avatar-tooltip {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #1a1a1a;
+    padding: 0.5rem 1.1rem;
+    border-radius: 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+    user-select: none;
+    transform-origin: center bottom;
+    animation: tooltipFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
+
+// Keyframes
+@keyframes headerSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+// 2D Birds flying and flapping keyframes
+@keyframes flyAcross {
+  0% {
+    left: -50px;
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-25px) scale(0.95);
+  }
+  100% {
+    left: 105vw;
+    transform: translateY(15px) scale(1);
+  }
+}
+
+@keyframes flapWings {
+  0% {
+    transform: scaleY(0.6) rotate(1deg);
+  }
+  100% {
+    transform: scaleY(1.1) rotate(-3deg);
+  }
+}
+
+// Responsive design
+@media (max-width: 900px) {
+  .entrance-overlay {
+    padding: 1.5rem;
+
+    &__header {
+      max-width: 380px;
+      padding: 1.4rem 1.8rem;
+    }
+
+    &__name {
+      font-size: 1.8rem;
+    }
+
+    &__welcome {
+      font-size: 1.35rem;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .entrance-overlay {
+    &__header {
+      align-self: center;
+      text-align: center;
+      align-items: center;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    &__divider {
+      justify-content: center;
+    }
+  }
+}
