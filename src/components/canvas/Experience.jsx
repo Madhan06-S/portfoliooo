@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 
 import InfiniteCorridorManager from './corridor/InfiniteCorridorManager';
+import BlenderEntrance from './entrance/BlenderEntrance';
 import EntranceDoors from './entrance/EntranceDoors';
 import EmptyCorridor from './entrance/EmptyCorridor';
 import TeleportRoom from './corridor/TeleportRoom';
@@ -21,7 +22,7 @@ const ENTRANCE_DOORS_Z = 22;
  * Experience Component
  * 
  * Flow:
- * 1. Preloader fades out -> user sees 3D entrance doors
+ * 1. Preloader fades out -> user sees 3D entrance doors (Blender 3D Entrance)
  * 2. Click doors -> they open + camera flies through
  * 3. Behind doors: infinite corridor with ITOM
  */
@@ -70,33 +71,12 @@ const Experience = ({ isLoaded, onSceneReady, performanceTier }) => {
                 AND room shaders are pre-compiled before the user starts interacting. */}
             <RoomWarmup onWarmupComplete={onSceneReady} isLowTier={isLowTier} />
 
-            {/* === GLOBAL LIGHTING === */}
-            {/* <ambientLight intensity={isLowTier ? 2.5 : 2.2} /> */}
-            {/* <directionalLight
-                position={[5, 10, 5]}
-                intensity={0.8}
-                color="#acacac"
-                castShadow={!isLowTier}
-                shadow-mapSize={[1024, 1024]}
-            /> */}
-            {/* <directionalLight position={[-5, 8, -10]} intensity={0.4} color="#ffffff" /> */}
-
-            {/* === EMPTY CORRIDOR (Disabled during initial CIT entrance landing) === */}
-            {/* {!hasEntered && (
-                <EmptyCorridor camera={camera} />
-            )} */}
-
-            {/* === ENTRANCE DOORS (visible until entered) === */}
+            {/* === 3D BLENDER ENTRANCE (visible until entered) === */}
             {!hasEntered && (
-                <EntranceDoors
+                <BlenderEntrance
                     position={[0, 0, ENTRANCE_DOORS_Z]}
                     onComplete={handleEntranceComplete}
                 />
-            )}
-
-            {/* Wooden PORTFOLIO Sign Board */}
-            {!hasEntered && (
-                <SignSystem position={[0, 0, ENTRANCE_DOORS_Z]} />
             )}
 
             {/* === INFINITE CORRIDOR (segment -1 SegmentDoors hidden during entrance) === */}
