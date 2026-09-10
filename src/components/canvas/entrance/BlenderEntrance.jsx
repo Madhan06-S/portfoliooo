@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, Suspense } from 'react';
 import { useThree } from '@react-three/fiber';
 import { useGLTF, useAnimations } from '@react-three/drei';
 import gsap from 'gsap';
@@ -9,11 +9,7 @@ import { useAchievements } from '../../../context/AchievementsContext';
 const MODEL_PATH = '/models/portfolio-entrance.glb';
 
 // Preload GLB asset
-try {
-  useGLTF.preload(MODEL_PATH);
-} catch (e) {
-  console.warn('GLB preload warning:', e);
-}
+useGLTF.preload(MODEL_PATH);
 
 const BlenderEntranceContent = ({ position = [0, 0, 22], onComplete }) => {
   const groupRef = useRef();
@@ -65,10 +61,20 @@ const BlenderEntranceContent = ({ position = [0, 0, 22], onComplete }) => {
     }
   }, [actions]);
 
-  // Locate Left_Door_Hinge & Right_Door_Hinge in scene hierarchy
+  // Traverse scene to set up shadows, material updates, and locate door hinge nodes
   useEffect(() => {
     if (scene) {
       scene.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+          if (child.material) {
+            child.material.needsUpdate = true;
+            if (child.material.roughness !== undefined) {
+              child.material.roughness = Math.max(child.material.roughness, 0.4);
+            }
+          }
+        }
         if (child.name === 'Left_Door_Hinge' || child.name.includes('Left_Door_Hinge')) {
           leftHingeRef.current = child;
         }
@@ -86,7 +92,7 @@ const BlenderEntranceContent = ({ position = [0, 0, 22], onComplete }) => {
     }
   }, [scene, nodes]);
 
-  // Adjust starting camera framing to match Blender wide cinematic framing
+  // Adjust starting camera framing to match Blender wide cinematic view
   useEffect(() => {
     if (camera) {
       gsap.to(camera.position, {
@@ -196,6 +202,12 @@ const BlenderEntranceContent = ({ position = [0, 0, 22], onComplete }) => {
 
   return (
     <group ref={groupRef} position={position}>
+      {/* Essential lighting for GLB materials in Three.js scene */}
+      <ambientLight intensity={2.2} />
+      <directionalLight position={[5, 10, 10]} intensity={1.5} color="#fff6e8" castShadow />
+      <directionalLight position={[-5, 8, 5]} intensity={0.8} color="#e0f0ff" />
+      <pointLight position={[0, 4, 3]} intensity={1.2} color="#ffe8d0" distance={15} />
+
       <primitive
         object={scene}
         onPointerOver={(e) => {
@@ -212,22 +224,12 @@ const BlenderEntranceContent = ({ position = [0, 0, 22], onComplete }) => {
   );
 };
 
-// Safe error boundary wrapper
 const BlenderEntrance = (props) => {
-  const [hasError, setHasError] = useState(false);
-
-  if (hasError) {
-    console.warn('BlenderEntrance: Error encountered, falling back');
-    return null;
-  }
-
-  try {
-    return <BlenderEntranceContent {...props} />;
-  } catch (error) {
-    console.warn('BlenderEntrance loading failed, falling back:', error);
-    setHasError(true);
-    return null;
-  }
+  return (
+    <Suspense fallback={null}>
+      <BlenderEntranceContent {...props} />
+    </Suspense>
+  );
 };
 
 export default BlenderEntrance;
